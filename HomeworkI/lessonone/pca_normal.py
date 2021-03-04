@@ -16,10 +16,19 @@ from pyntcloud import PyntCloud
 def PCA(data, correlation=False, sort=True):
     # 作业1
     # 屏蔽开始
-    np.correlation(data)
-
-
-
+    # 获取 data的shape大小
+    m, n = np.shape(data)   
+    # 获取数据的平均值
+    average = np.mean(data, axis=0)
+    # 数据中心化处理， 标准化处理
+    data_adjust = data- average
+    # 得到协方差
+    if correlation == False:
+        conX = np.cov(data_adjust.T)
+        eigenvalues, eigenvectors =  np.linalg.eig(conX)
+    else:
+        conX = np.corrcoef(data_adjust.T)
+        eigenvalues, eigenvectors =  np.linalg.eig(conX)
     # 屏蔽结束
 
     if sort:
@@ -53,13 +62,19 @@ def main():
     print('the main orientation of this pointcloud is: ', point_cloud_vector)
     # TODO: 此处只显示了点云，还没有显示PCA
     # o3d.visualization.draw_geometries([point_cloud_o3d])
-    
+    main_vector1 = v[:1]
+    main_vector2 = v[:2]
+
     # 循环计算每个点的法向量
     pcd_tree = o3d.geometry.KDTreeFlann(point_cloud_o3d)
     normals = []
     # 作业2
     # 屏蔽开始
-
+    for i in range(points.shape[0]):
+        xyz = points.values[i][0:3]
+        xyz_new = np.dot(xyz, main_vector1)*main_vector1
+        normals.append(xyz_new)
+        # point_cloud_o3d.points.values[i][0:3] = xyz_new
     # 由于最近邻搜索是第二章的内容，所以此处允许直接调用open3d中的函数
 
     # 屏蔽结束
