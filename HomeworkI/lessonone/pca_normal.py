@@ -16,6 +16,8 @@ from pyntcloud import PyntCloud
 def PCA(data, correlation=False, sort=True):
     # 作业1
     # 屏蔽开始
+    np.correlation(data)
+
 
 
     # 屏蔽结束
@@ -30,13 +32,14 @@ def PCA(data, correlation=False, sort=True):
 
 def main():
     # 指定点云路径
-    cat_index = 1 # 物体编号，范围是0-39，即对应数据集中40个物体
-    root_dir = '/Users/linear/Documents/PyProject/Python_3D_Point/data_depth_annotated/' # 数据集路径
-    cat = os.listdir(root_dir)
-    filename = os.path.join(root_dir, cat[cat_index],'train', cat[cat_index]+'_0001.ply') # 默认使用第一个点云
+    # cat_index = 1 # 物体编号，范围是0-39，即对应数据集中40个物体
+    # root_dir = '/Users/linear/Documents/PyProject/Python_3D_Point/data_depth_annotated/' # 数据集路径
+    # cat = os.listdir(root_dir)
+    # filename = os.path.join(root_dir, cat[cat_index],'train', cat[cat_index]+'_0001.ply') # 默认使用第一个点云
 
     # 加载原始点云
-    point_cloud_pynt = PyntCloud.from_file(filename)
+    filename = "/Users/linear/Documents/GitFile/3D_Ponit_py/HomeworkI/data/person/person_0001.txt"
+    point_cloud_pynt = PyntCloud.from_file(filename,  names=['x','y','z','nx','ny','nz'])
     point_cloud_o3d = point_cloud_pynt.to_instance("open3d", mesh=False)
     # o3d.visualization.draw_geometries([point_cloud_o3d]) # 显示原始点云
 
