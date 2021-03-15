@@ -13,8 +13,23 @@ def voxel_filter(point_cloud, leaf_size):
     filtered_points = []
     # 作业3
     # 屏蔽开始
+    point_cloud = np.array(point_cloud)
+    uppers = np.max(point_cloud, axis=0)
+    lowers = np.min(point_cloud, axis=0)
 
- 
+    dims = np.ceil((uppers - lowers)/ leaf_size)
+
+    indices = (point_cloud - lowers) // leaf_size
+    h_indices = indices[:, 0] + indices[:, 1]*dims[0] + indices[:, 2]*dims[0]*dims[1]
+
+
+    for h_index in np.unique(h_indices):
+        points = point_cloud[h_indices == h_index]
+        if use_centroid:
+            filtered_points.append(up.mean(points, axis = 0))
+        else:
+            filtered_points.append(random.choice(points))
+
     # 屏蔽结束
 
     # 把点云格式改成array，并对外返回
@@ -30,8 +45,8 @@ def main():
     # point_cloud_pynt = PyntCloud.from_file(file_name)
 
     # 加载自己的点云文件
-    file_name = "/Users/renqian/Downloads/program/cloud_data/11.ply"
-    point_cloud_pynt = PyntCloud.from_file(file_name)
+    filename = "/Users/linear/Documents/GitFile/3D_Ponit_py/HomeworkI/data/person/person_0001.txt"
+    point_cloud_pynt = PyntCloud.from_file(filename,  names=['x','y','z','nx','ny','nz'])
 
     # 转成open3d能识别的格式
     point_cloud_o3d = point_cloud_pynt.to_instance("open3d", mesh=False)

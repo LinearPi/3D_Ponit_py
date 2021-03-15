@@ -17,18 +17,16 @@ def PCA(data, correlation=False, sort=True):
     # 作业1
     # 屏蔽开始
     # 获取 data的shape大小
-    m, n = np.shape(data)   
+    data = data.T 
     # 获取数据的平均值
-    average = np.mean(data, axis=0)
+    # average = np.mean(data, axis=0)
+    data = data - data.mean(axis=1, keepdims=True)
     # 数据中心化处理， 标准化处理
-    data_adjust = data- average
-    # 得到协方差
-    if correlation == False:
-        conX = np.cov(data_adjust.T)
-        eigenvalues, eigenvectors =  np.linalg.eig(conX)
-    else:
-        conX = np.corrcoef(data_adjust.T)
-        eigenvalues, eigenvectors =  np.linalg.eig(conX)
+    data_T = data.T
+    H = np.matmul(data, data_T)
+    # svd
+    eigenvalues, eigenvectors, _  =  np.linalg.svd(H, full_matrices=True)
+
     # 屏蔽结束
 
     if sort:
@@ -61,21 +59,24 @@ def main():
     point_cloud_vector = v[:, 2] #点云主方向对应的向量
     print('the main orientation of this pointcloud is: ', point_cloud_vector)
     # TODO: 此处只显示了点云，还没有显示PCA
-    # o3d.visualization.draw_geometries([point_cloud_o3d])
-    main_vector1 = v[:1]
-    main_vector2 = v[:2]
-
     # 循环计算每个点的法向量
-    pcd_tree = o3d.geometry.KDTreeFlann(point_cloud_o3d)
+    projected_points = np.dot(point, v[:, :2])
+    projected_points = np.hstack([projected_points,
+                    np.zeros((projected_points.shape[0],1))])
+    projected_point_cloud_o3d = o3d.geometry.PointCloud()
+    projected_point_cloud_o3d.points = o3d.utility.Vector3dVector(projected_points)
+    o3d.visualization.draw_geometries([point_cloud_o3d])
     normals = []
     # 作业2
     # 屏蔽开始
-    for i in range(points.shape[0]):
-        xyz = points.values[i][0:3]
-        xyz_new = np.dot(xyz, main_vector1)*main_vector1
-        normals.append(xyz_new)
-        # point_cloud_o3d.points.values[i][0:3] = xyz_new
     # 由于最近邻搜索是第二章的内容，所以此处允许直接调用open3d中的函数
+    cloud_range = points.max(axis=0) - points.min(axis=0)
+    radius = cloud_range.max() * 0.05
+    for point in point_cloud_o3d.points:
+        cnt, idxs, dists = pcd_tree.search_radius_vector_3d(point, radius)
+        w, v = PCA(points[idxs])
+        normal = v[:, -1]
+        normals.append(normal)
 
     # 屏蔽结束
     normals = np.array(normals, dtype=np.float64)
